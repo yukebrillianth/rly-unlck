@@ -27,7 +27,7 @@ This is a **self-hosted fork of [Rallly](https://github.com/lukevella/rallly)** 
 - **🎨 Zero Modifications to UI** — Looks and behaves exactly like official Rallly
 - **📦 Standalone Build** — Next.js standalone output for minimal container footprint
 
-> **⚠️ Important:** This fork is intended for **personal, educational, or internal use only**. If you're running a commercial deployment or want to support the original creator, please purchase an official license from [rallly.co](https://rallly.co).
+> **⚠️ Important:** This fork is intended for **personal, educational, or internal use only**. If you're running a commercial deployment or want to support the original creator, please purchase an official license from [rallly.co](https://rallly.co). This project is truly impressive, and if you plan on using it to its full potential, make sure you purchase a legitimate license key.
 
 ---
 
