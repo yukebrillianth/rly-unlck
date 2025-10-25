@@ -1,0 +1,25 @@
+{
+  "name": "@rallly/database",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate",
+    "db:deploy": "prisma migrate deploy",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "type-check": "tsc --pretty --noEmit"
+  },
+  "exports": "./index.ts",
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "dayjs": "^1.11.13"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@rallly/tsconfig": "workspace:*",
+    "@types/node": "^20.11.1",
+    "prisma": "^6.8.2",
+    "tsx": "^4.6.2"
+  }
+}

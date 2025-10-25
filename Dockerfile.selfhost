@@ -1,0 +1,40 @@
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+ENV NODE_ENV=production \
+	NEXT_TELEMETRY_DISABLED=1 \
+	SKIP_ENV_VALIDATION=1 \
+	NEXT_PUBLIC_SELF_HOSTED=true \
+	PORT=3333
+
+# Runtime URLs (NEXT_PUBLIC_BASE_URL, NEXTAUTH_URL, AUTH_URL, etc.) are intentionally
+# not baked into the image so deployments can inject environment-specific values
+# without leaking secrets or domains into version control. Provide them via your
+# orchestrator (docker-compose, Kubernetes secrets, etc.).
+
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/* \
+	&& corepack enable
+
+# Copy monorepo (retain workspace packages at runtime)
+COPY package.json pnpm-lock.yaml turbo.json pnpm-workspace.yaml ./
+COPY apps ./apps
+COPY packages ./packages
+
+# Install deps (production install keeps needed workspace pkgs)
+RUN pnpm install --frozen-lockfile
+
+# Build only the web app (others resolved via workspaces)
+# Copy the generated static assets and public files into the standalone output
+RUN pnpm --filter @rallly/web build \
+	&& mkdir -p apps/web/.next/standalone/apps/web/.next/static \
+	&& cp -R apps/web/.next/static/. apps/web/.next/standalone/apps/web/.next/static \
+	&& mkdir -p apps/web/.next/standalone/apps/web/public \
+	&& cp -R apps/web/public/. apps/web/.next/standalone/apps/web/public
+
+# Ensure pnpm virtual store bin path available
+ENV PATH=/app/node_modules/.bin:/app/node_modules/.pnpm/node_modules/.bin:$PATH
+
+EXPOSE 3333
+
+# Run the standalone server directly (produced by Next.js standalone output)
+CMD ["node","apps/web/.next/standalone/apps/web/server.js"]

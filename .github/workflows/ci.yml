@@ -1,0 +1,100 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  type-check:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/pnpm-install
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Check types
+        run: pnpm type-check
+
+  sherif:
+    name: Sherif
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+
+      - name: Run sherif
+        run: pnpm dlx sherif@latest
+
+  linting:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/pnpm-install
+
+      - name: Check linting rules
+        run: pnpm turbo check
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/pnpm-install
+
+      - name: Run tests
+        run: pnpm test:unit
+
+  # Label of the container job
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5450/rallly
+      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5450/rallly
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/pnpm-install
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Install system dependencies
+        run: sudo apt-get update
+
+      - name: Install playwright dependencies
+        run: pnpm playwright install --with-deps chromium
+
+      - name: Create production build
+        run: pnpm turbo build:test --filter=@rallly/web
+
+      - name: Start services
+        run: pnpm docker:up
+
+      - name: Setup database
+        run: pnpm db:deploy
+
+      - name: Run tests
+        run: pnpm turbo test:integration
+
+      - name: Upload artifact playwright-report
+        if: ${{ success() || failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: ./apps/web/playwright-report

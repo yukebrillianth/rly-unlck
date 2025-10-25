@@ -1,0 +1,23 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "cSpell.words": ["Rallly", "Vella"],
+  "jestrunner.codeLensSelector": "",
+  "vitest.filesWatcherInclude": "**/*.test.ts",
+  "editor.formatOnSave": true,
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "typescript.tsserver.log": "verbose",
+  "typescript.tsserver.trace": "messages",
+  "references.preferredLocation": "view",
+  "editor.defaultFormatter": "biomejs.biome"
+}

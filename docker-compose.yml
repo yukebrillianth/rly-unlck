@@ -1,0 +1,59 @@
+services:
+  rallly_db:
+    image: postgres:14.2
+    restart: always
+    ports:
+      - "5450:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=rallly
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rallly"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rallly_selfhosted:
+    build:
+      context: .
+      dockerfile: Dockerfile.selfhost
+    restart: always
+    depends_on:
+      rallly_db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    ports:
+      - "3333:3333"
+    env_file:
+      - .env
+    environment:
+      # Only overrides or values not present in .env should live here.
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3333/api/status || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-me}
+      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-http://localhost:9000}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-http://localhost:9001}
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+volumes:
+  db-data:
+  minio-data:

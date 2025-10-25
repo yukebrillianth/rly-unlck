@@ -1,0 +1,25 @@
+{
+  "name": "@rallly/billing",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "checkout-expiry": "dotenv -e .env -- pnpx tsx ./src/scripts/checkout-expiry.ts",
+    "subscription-data-sync": "dotenv -e .env -- pnpx tsx ./src/scripts/subscription-data-sync.ts",
+    "sync-payment-methods": "dotenv -e .env -- pnpx tsx ./src/scripts/sync-payment-methods.ts",
+    "sync-space-subscription": "dotenv -e .env -- pnpx tsx ./src/scripts/sync-space-subscription.ts",
+    "type-check": "tsc --pretty --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-radio-group": "^1.2.3",
+    "@rallly/database": "workspace:*",
+    "@rallly/ui": "workspace:*",
+    "stripe": "^13.2.0"
+  },
+  "devDependencies": {
+    "@rallly/tsconfig": "workspace:*"
+  }
+}
