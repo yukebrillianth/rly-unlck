@@ -51,11 +51,11 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: apps/web/Dockerfile
+          file: ./apps/web/Dockerfile
           push: true
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BUILD_HASH=${{ github.sha }}
+            SELF_HOST=true
